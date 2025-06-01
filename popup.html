@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Codex</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+    <script src="popup.js" defer></script>
+    <script src="secret-code.js"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+            text-align: center;
+            padding: 16px;
+            width: 250px;
+            border-radius: 12px;
+            background: #e2e2e2;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            margin: 0;
+            font-family: "Montserrat", sans-serif;
+            color: #212121;
+        }
+
+        img {
+            width: 100px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            margin: 0;
+            font-weight: 600;
+            font-size: 16px;
+        }
+
+        #code {
+            font-size: 28px;
+            margin: 8px 0;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            background-color: #4EA080;
+            color: white;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #346B55;
+        }
+    </style>
+</head>
+
+<body>
+
+    <img src="https://dashboard.liasesforas.com/images/ressexLogo.png" alt="Logo">
+    <p>TOTP Code</p>
+    <div id="code">Loading...</div>
+    <button id="copyBtn">Copy Code</button>
+
+</body>
+
+</html>
