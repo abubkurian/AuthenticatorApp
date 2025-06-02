@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <title>Codex</title>
+    <title>Mint</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
@@ -41,6 +41,10 @@
             letter-spacing: 1px;
         }
 
+        #title-logo {
+            width: 80%;
+        }
+
         button {
             margin-top: 10px;
             padding: 6px 12px;
@@ -61,7 +65,8 @@
 
 <body>
 
-    <img src="https://dashboard.liasesforas.com/images/ressexLogo.png" alt="Logo">
+    <img id="title-logo" src="Title Logo.png" alt="Logo">
+    <br>
     <p>TOTP Code</p>
     <div id="code">Loading...</div>
     <button id="copyBtn">Copy Code</button>

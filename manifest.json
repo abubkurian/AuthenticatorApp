@@ -1,6 +1,6 @@
 {
     "manifest_version": 3,
-    "name": "Codex",
+    "name": "Mint",
     "version": "1.0",
     "description": "Generates TOTP codes from a shared secret.",
     "permissions": [
