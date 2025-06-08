@@ -1,2 +1,2 @@
 
-An extension to give TOTP for RESSEX.
+An extension to give TOTP on sharing secret key.
