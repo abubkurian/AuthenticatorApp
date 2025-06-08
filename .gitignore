@@ -27,3 +27,15 @@ replay_pid*
 # Files
 
 secret-code.js
+
+# Chrome extension
+
+*~
+*.DS_store
+node_modules
+
+# Temporary directory for debugging extension samples
+_debug
+_metadata
+dist
+**/*.swp 
