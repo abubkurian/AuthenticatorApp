@@ -45,6 +45,15 @@
             width: 80%;
         }
 
+        input {
+            width: 90%;
+            padding: 6px;
+            margin: 10px 0;
+            font-size: 14px;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+        }
+
         button {
             margin-top: 10px;
             padding: 6px 12px;
@@ -67,9 +76,20 @@
 
     <img id="title-logo" src="Title Logo.png" alt="Logo">
     <br>
-    <p>TOTP Code</p>
-    <div id="code">Loading...</div>
-    <button id="copyBtn">Copy Code</button>
+    <div id="setup-section" style="display: none;">
+        <h3>Enter Secret Code</h3>
+        <input type="text" id="secret-input" placeholder="Base32 secret" />
+        <button id="save-secret">Save</button>
+    </div>
+
+    <div id="main-section" style="display: none;">
+
+        <p>TOTP Code</p>
+        <div id="code">Loading...</div>
+        <button id="copyBtn">Copy Code</button>
+        <br /><br />
+        <button id="change-secret">Change Secret</button>
+    </div>
 
 </body>
 

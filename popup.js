@@ -1,4 +1,4 @@
-// Base32 decoding
+// Base32 decoding function
 function base32toBytes(base32) {
     const base32chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
     let bits = "";
@@ -19,13 +19,12 @@ function base32toBytes(base32) {
     return new Uint8Array(bytes);
 }
 
-// Generate TOTP
 async function generateTOTP(secret, interval = 30) {
     const key = base32toBytes(secret);
     const counter = Math.floor(Date.now() / 1000 / interval);
     const buffer = new ArrayBuffer(8);
     const view = new DataView(buffer);
-    view.setUint32(4, counter); // last 4 bytes only
+    view.setUint32(4, counter); // set last 4 bytes
 
     const cryptoKey = await crypto.subtle.importKey(
         'raw', key, { name: 'HMAC', hash: 'SHA-1' }, false, ['sign']
@@ -43,33 +42,69 @@ async function generateTOTP(secret, interval = 30) {
     return otp.toString().padStart(6, '0');
 }
 
-// Load and display TOTP
-const secret = code.secret; // replace with your base32 secret
+// UI Elements
+const codeEl = document.getElementById('code');
+const copyBtn = document.getElementById('copyBtn');
+const setupSection = document.getElementById('setup-section');
+const mainSection = document.getElementById('main-section');
+const inputField = document.getElementById('secret-input');
+const saveSecretBtn = document.getElementById('save-secret');
+const changeSecretBtn = document.getElementById('change-secret');
 
+let secret = "";
+
+// Show TOTP and refresh every 30s
 async function updateCode() {
+    if (!secret) return;
     const code = await generateTOTP(secret);
-    document.getElementById('code').textContent = code;
+    codeEl.textContent = code;
 }
-
-
-// Refresh every 30s
-updateCode();
 setInterval(updateCode, 30000);
 
-// Copy code
-
-document.getElementById('copyBtn').addEventListener('click', async () => {
-    const code = document.getElementById('code').textContent;
-    try {
-        await navigator.clipboard.writeText(code);
-        const btn = document.getElementById('copyBtn');
-        btn.textContent = "Copied!";
-        setTimeout(() => btn.textContent = "Copy Code", 1500);
-    } catch (err) {
-        alert('Failed to copy code.');
+// Load saved secret
+chrome.storage.sync.get(["totpSecret"], async (result) => {
+    if (result.totpSecret) {
+        secret = result.totpSecret;
+        setupSection.style.display = "none";
+        mainSection.style.display = "block";
+        await updateCode();
+    } else {
+        setupSection.style.display = "block";
+        mainSection.style.display = "none";
     }
 });
 
+// Save secret
+saveSecretBtn.addEventListener("click", () => {
+    const newSecret = inputField.value.trim().toUpperCase();
+    if (newSecret.length === 0) return;
 
+    chrome.storage.sync.set({ totpSecret: newSecret }, () => {
+        secret = newSecret;
+        inputField.value = "";
+        setupSection.style.display = "none";
+        mainSection.style.display = "block";
+        updateCode();
+    });
+});
 
+// Copy code
+copyBtn.addEventListener("click", async () => {
+    const code = codeEl.textContent;
+    try {
+        await navigator.clipboard.writeText(code);
+        copyBtn.textContent = "Copied!";
+        setTimeout(() => (copyBtn.textContent = "Copy Code"), 1500);
+    } catch {
+        alert("Failed to copy.");
+    }
+});
 
+// Change secret
+changeSecretBtn.addEventListener("click", () => {
+    chrome.storage.sync.remove("totpSecret", () => {
+        secret = "";
+        mainSection.style.display = "none";
+        setupSection.style.display = "block";
+    });
+});
