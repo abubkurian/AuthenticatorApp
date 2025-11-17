@@ -1,95 +1,17 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 
 <head>
-    <meta charset="UTF-8">
-    <title>Mint</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
-    <script src="popup.js" defer></script>
-    <script src="secret-code.js"></script>
-    <style>
-        body {
-            box-sizing: border-box;
-            text-align: center;
-            padding: 16px;
-            width: 250px;
-            border-radius: 12px;
-            background: #e2e2e2;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            margin: 0;
-            font-family: "Montserrat", sans-serif;
-            color: #212121;
-        }
-
-        img {
-            width: 100px;
-            margin-bottom: 10px;
-        }
-
-        p {
-            margin: 0;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        #code {
-            font-size: 28px;
-            margin: 8px 0;
-            font-weight: bold;
-            letter-spacing: 1px;
-        }
-
-        #title-logo {
-            width: 80%;
-        }
-
-        input {
-            width: 90%;
-            padding: 6px;
-            margin: 10px 0;
-            font-size: 14px;
-            border-radius: 6px;
-            border: 1px solid #ccc;
-        }
-
-        button {
-            margin-top: 10px;
-            padding: 6px 12px;
-            border: none;
-            border-radius: 6px;
-            background-color: #4EA080;
-            color: white;
-            font-size: 14px;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
-
-        button:hover {
-            background-color: #346B55;
-        }
-    </style>
+  <title>Mint Authenticator</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-
-    <img id="title-logo" src="Title Logo.png" alt="Logo">
-    <br>
-    <div id="setup-section" style="display: none;">
-        <h3>Enter Secret Code</h3>
-        <input type="text" id="secret-input" placeholder="Base32 secret" />
-        <button id="save-secret">Save</button>
-    </div>
-
-    <div id="main-section" style="display: none;">
-
-        <p>TOTP Code</p>
-        <div id="code">Loading...</div>
-        <button id="copyBtn">Copy Code</button>
-        <br /><br />
-        <button id="change-secret">Change Secret</button>
-    </div>
+  <div id="page-list" style="display:none;"></div>
+  <div id="page-view" style="display:none;"></div>
+  <div id="page-add" style="display:none;"></div>
+  <script src="jsqr.js"></script>
+  <script src="spa.js"></script>
 
 </body>
 

@@ -39,3 +39,4 @@ _debug
 _metadata
 dist
 **/*.swp 
+/backup
