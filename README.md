@@ -29,8 +29,7 @@ Currently, Mint 2.0 is available as an unpacked extension.
 **Option 1: Scan QR Code**
 1.  Open the Mint extension popup.
 2.  Click the **Add (+)** button.
-3.  Point your webcam at a QR code, or ensure a QR code is visible on your screen (if screen capture features are added in future updates - currently uses camera).
-    *   *Note: The current version uses `Html5Qrcode` which typically requests camera access.*
+3.  You can either upload the qr code image or add the code embedded in the qr directly
 
 **Option 2: Manual Entry**
 1.  Open the Mint extension popup.
@@ -71,3 +70,7 @@ To modify or build upon this extension:
 ## License
 
 [GNU GENERAL PUBLIC LICENSE](LICENSE)
+
+## Warning
+
+Documentation is ai generated
