@@ -70,4 +70,4 @@ To modify or build upon this extension:
 
 ## License
 
-[MIT License](LICENSE)
+[GNU GENERAL PUBLIC LICENSE](LICENSE)
