@@ -190,7 +190,7 @@ function deleteKey(name) {
  */
 function loadViewPage(name) {
   const container = document.getElementById("page-view");
-  container.innerHTML = "<h3>" + name + "</h3><div id='code'>Loading...</div><button id='copy'>Copy</button><br><button <button id='back-btn'>Back</button>";
+  container.innerHTML = "<h3>" + name + "</h3><div id='code'>Loading...</div><button id='copy'>Copy</button><br><button id='fill'>Fill</button><br><button id='back-btn'>Back</button><br><button id='delete-btn'>Delete</button>";
   chrome.storage.sync.get({ keys: {} }, (data) => {
     const secret = data.keys[name];
     const updateCode = () => {
@@ -206,6 +206,31 @@ function loadViewPage(name) {
     const code = document.getElementById("code").textContent;
     navigator.clipboard.writeText(code);
   };
+
+  document.getElementById("fill").onclick = () => {
+    const code = document.getElementById("code").textContent;
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(code);
+
+    // Also autofill in webpage
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: "fill_otp", code },
+        (response) => {
+          console.log("Autofill response:", response);
+        }
+      );
+    });
+  };
+
+  // Delete button handler
+  document.getElementById("delete-btn").addEventListener("click", () => {
+    deleteKey(name);
+    location.hash = "#list";
+  });
+
   document.getElementById("back-btn").addEventListener("click", () => {
     location.hash = "#list";
   });
