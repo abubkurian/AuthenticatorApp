@@ -73,4 +73,4 @@ To modify or build upon this extension:
 
 ## Warning
 
-Documentation is ai generated
+Made with the help of ai
