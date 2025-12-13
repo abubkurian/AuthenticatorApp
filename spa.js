@@ -22,6 +22,17 @@
  * @param {string} hash - The location.hash string (including the leading '#').
  */
 
+
+function isPopup() {
+  return window.location.pathname.includes("popup");
+}
+
+function isLinux() {
+  return navigator.userAgent.toLowerCase().includes("linux");
+}
+
+
+
 const routes = {
   "#list": { page: "page-list", loader: loadListPage },
   "#addnew": { page: "page-add", loader: loadAddPage },
@@ -35,6 +46,14 @@ const routes = {
 function showPage(hash) {
   // Hide all pages
   document.querySelectorAll("div[id^=page-]").forEach(div => div.style.display = "none");
+
+  if (hash === "#addnew" && isLinux() && isPopup()) {
+    chrome.tabs.create({
+      url: chrome.runtime.getURL("add.html")
+    });
+    location.hash = "#list";
+    return;
+  }
 
   // Handle special "view" route with dynamic name
   if (hash.startsWith("#view/")) {
@@ -159,7 +178,16 @@ function loadListPage() {
     }
     const addBtn = document.createElement("button");
     addBtn.textContent = "Add New";
-    addBtn.onclick = () => location.hash = "#addnew";
+    addBtn.onclick = () => {
+      if (isLinux() && isPopup()) {
+        chrome.tabs.create({
+          url: chrome.runtime.getURL("add.html")
+    });
+  } else {
+    location.hash = "#addnew";
+  }
+};
+
     container.appendChild(addBtn);
   });
 }
@@ -293,15 +321,16 @@ function handleQrUpload(e) {
   if (!file) return;
 
   const img = new Image();
-  const reader = new FileReader();
+  const url = URL.createObjectURL(file);
 
-  reader.onload = () => {
-    img.src = reader.result;
-    img.onload = () => decodeQrFromImage(img);
+  img.onload = () => {
+    decodeQrFromImage(img);
+    URL.revokeObjectURL(url);
   };
 
-  reader.readAsDataURL(file);
+  img.src = url;
 }
+
 
 function decodeQrFromImage(img) {
   const canvas = document.createElement("canvas");
