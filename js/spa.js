@@ -32,7 +32,7 @@ function isLinux() {
 }
 
 
-
+// Navigational routes mapping hash to page ID and optional loader function
 const routes = {
   "#list": { page: "page-list", loader: loadListPage },
   "#addnew": { page: "page-add", loader: loadAddPage },
@@ -42,7 +42,6 @@ const routes = {
 
 
 // function to show the correct page based on the hash
-
 function showPage(hash) {
   // Hide all pages
   document.querySelectorAll("div[id^=page-]").forEach(div => div.style.display = "none");
@@ -55,88 +54,32 @@ function showPage(hash) {
     return;
   }
 
-  // Handle special "view" route with dynamic name
+  // Handle special "view" route with dynamic name - view individual account added
   if (hash.startsWith("#view/")) {
-    const name = decodeURIComponent(hash.split("/")[1]);
+    const name = decodeURIComponent(hash.split("/")[1]); // Extract name from hash
     loadViewPage(name);
     document.getElementById("page-view").style.display = "block";
     return;
   }
 
   // Match known route or default to "#list"
-  const route = routes[hash] || routes["#list"];
+  const route = routes[hash] || routes["#list"]; //example --> routes["#list"] = { page: "page-list", loader: loadListPage }
 
   // Load content (if loader exists)
   if (typeof route.loader === "function") {
-    route.loader();
+    route.loader(); // Call the loader function to populate the page
   }
 
   // Show corresponding page (if element exists)
   const pageEl = document.getElementById(route.page);
   if (pageEl) {
     pageEl.style.display = "block";
-  } else {
+  }
+  else {
     console.warn(`Page element not found: ${route.page}`);
   }
 }
 
-
-
-// ... loadListPage, loadViewPage, loadAddPage will be added next ...
-
-/**
- * Generate a TOTP code from a Base32 secret using HMAC-SHA1.
- *
- * Implementation notes:
- * - Uses 30-second time steps (standard TOTP)
- * - Returns a Promise resolving to a zero-padded 6-digit string
- * - Uses the Web Crypto API (crypto.subtle.importKey + sign)
- *
- * @param {string} secret - Base32-encoded secret (case-insensitive, padding `=` allowed)
- * @returns {Promise<string>} Promise resolving to a 6-digit TOTP string
- */
-function generateTOTP(secret) {
-  const key = base32ToBytes(secret);
-  const epoch = Math.floor(Date.now() / 1000);
-  const time = Math.floor(epoch / 30);
-  const buffer = new ArrayBuffer(8);
-  const view = new DataView(buffer);
-  view.setUint32(4, time);
-  return crypto.subtle.importKey("raw", key, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]).then(cryptoKey =>
-    crypto.subtle.sign("HMAC", cryptoKey, buffer).then(signature => {
-      const bytes = new Uint8Array(signature);
-      const offset = bytes[bytes.length - 1] & 0xf;
-      const binary = ((bytes[offset] & 0x7f) << 24) |
-        ((bytes[offset + 1] & 0xff) << 16) |
-        ((bytes[offset + 2] & 0xff) << 8) |
-        (bytes[offset + 3] & 0xff);
-      const otp = binary % 1000000;
-      return otp.toString().padStart(6, '0');
-    })
-  );
-}
-
-/**
- * Convert a Base32-encoded string to a Uint8Array of bytes.
- * Non-alphabet characters are stripped and padding `=` is ignored.
- *
- * @param {string} base32 - Base32 string (A-Z2-7, optionally padded)
- * @returns {Uint8Array} decoded bytes
- */
-function base32ToBytes(base32) {
-  const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-  const clean = base32.replace(/=+$/, "").toUpperCase().replace(/[^A-Z2-7]/g, '');
-  let bits = "";
-  for (let char of clean) {
-    const val = alphabet.indexOf(char);
-    bits += val.toString(2).padStart(5, "0");
-  }
-  const bytes = [];
-  for (let i = 0; i + 8 <= bits.length; i += 8) {
-    bytes.push(parseInt(bits.substring(i, i + 8), 2));
-  }
-  return new Uint8Array(bytes);
-}
 
 
 // First page to load. Shows list of accounts added.
@@ -149,49 +92,106 @@ function base32ToBytes(base32) {
  */
 function loadListPage() {
   const container = document.getElementById("page-list");
+
+  // clear existing content and set up header
   container.innerHTML = "<img id=\"myc\" src=\"images/Title Logo.png\" alt=\"Mint Your Code\"> <h3>Accounts</h3>";
+
+
+  //1. load all the keys from the storage
   chrome.storage.sync.get({ keys: {} }, (data) => {
-
-    // all the keys stored in the storage is loaded here
     const keys = data.keys;
+
+    //2. for each key, create a div with account name, code, and buttons
     for (const name in keys) {
+
+      const secret = keys[name]; // Get secret directly from the data we already fetched
+
       const div = document.createElement("div");
-      const viewBtn = document.createElement("button");
-      const deleteBtn = document.createElement("button");
+      div.className = "account-item"; // Good for CSS styling
 
-      div.textContent = name;
-      viewBtn.textContent = "View";
-      deleteBtn.textContent = "Delete";
+      const label = document.createElement("strong");
+      label.textContent = name;
 
-      viewBtn.addEventListener("click", () => {
-        location.hash = `#view/${encodeURIComponent(name)}`;
-      });
+      const code = document.createElement("div");
+      code.className = "otp-code";
+      code.textContent = "Loading...";
 
-      deleteBtn.addEventListener("click", () => {
-        deleteKey(name);
-      });
+      // Action Buttons
+      const viewBtn = createBtn("View", () => location.hash = `#view/${encodeURIComponent(name)}`);
+      const deleteBtn = createBtn("Delete", () => deleteKey(name));
+      const fillBtn = createBtn("Fill", () => handleFill(code.textContent));
 
-      div.appendChild(viewBtn);
-      div.appendChild(deleteBtn);
+      // --- TOTP Update Logic ---
+      const updateCode = () => {
+        generateTOTP(secret).then(key => {
+          // If generateTOTP returns null or undefined, default to "------"
+          code.textContent = key || "Error";
+        }).catch(err => {
+          console.error("TOTP Error:", err);
+          code.textContent = "Error";
+        });
+      };
+
+      updateCode();
+      const interval = setInterval(updateCode, 30000); // Update every 30s
+
+      // Append elements to div
+
+      div.append(label, code, viewBtn, deleteBtn, fillBtn);
       container.appendChild(div);
 
     }
+
     const addBtn = document.createElement("button");
     addBtn.textContent = "Add New";
     addBtn.onclick = () => {
       if (isLinux() && isPopup()) {
         chrome.tabs.create({
           url: chrome.runtime.getURL("add.html")
-    });
-  } else {
-    location.hash = "#addnew";
-  }
-};
+        });
+      } else {
+        location.hash = "#addnew";
+      }
+    };
 
     container.appendChild(addBtn);
   });
 }
 
+
+// Helper to keep the main function clean
+function createBtn(text, onClick) {
+  const btn = document.createElement("button");
+  btn.textContent = text;
+  btn.onclick = onClick;
+  return btn;
+}
+
+function handleFill(currentCode) {
+
+  // Check if the code is actually loaded
+  if (currentCode === "Loading..." || currentCode === "Error") {
+    console.warn("Code not ready yet.");
+    return;
+  }
+  navigator.clipboard.writeText(currentCode);
+  // Send to content script
+  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    if (tabs[0]?.id) {
+      chrome.tabs.sendMessage(
+        tabs[0].id,
+        { action: "fill_otp", codeNum: currentCode }, // Ensure key name matches your content script
+        (response) => {
+          if (chrome.runtime.lastError) {
+            console.error("Content script not found or error:", chrome.runtime.lastError.message);
+          } else {
+            console.log("Autofill response:", response);
+          }
+        }
+      );
+    }
+  });
+}
 /**
  * Delete a stored key after a confirmation prompt.
  *
@@ -219,6 +219,7 @@ function deleteKey(name) {
 function loadViewPage(name) {
   const container = document.getElementById("page-view");
   container.innerHTML = "<h3>" + name + "</h3><div id='code'>Loading...</div><button id='copy'>Copy</button><br><button id='fill'>Fill</button><br><button id='back-btn'>Back</button><br><button id='delete-btn'>Delete</button>";
+
   chrome.storage.sync.get({ keys: {} }, (data) => {
     const secret = data.keys[name];
     const updateCode = () => {
