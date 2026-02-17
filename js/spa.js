@@ -46,6 +46,7 @@ function showPage(hash) {
   // Hide all pages
   document.querySelectorAll("div[id^=page-]").forEach(div => div.style.display = "none");
 
+  // Special handling for "addnew" route on Linux popup - open in new tab instead of popup
   if (hash === "#addnew" && isLinux() && isPopup()) {
     chrome.tabs.create({
       url: chrome.runtime.getURL("add.html")
@@ -89,7 +90,7 @@ function showPage(hash) {
  *
  * Reads `keys` from `chrome.storage.sync` and renders each account with a
  * View and Delete button. Adds an "Add New" button at the bottom.
- */
+ **/
 function loadListPage() {
   const container = document.getElementById("page-list");
 
@@ -119,7 +120,7 @@ function loadListPage() {
       // Action Buttons
       const viewBtn = createBtn("View", () => location.hash = `#view/${encodeURIComponent(name)}`);
       const deleteBtn = createBtn("Delete", () => deleteKey(name));
-      const fillBtn = createBtn("Fill", () => handleFill(code.textContent));
+
 
       // --- TOTP Update Logic ---
       const updateCode = () => {
@@ -134,6 +135,8 @@ function loadListPage() {
 
       updateCode();
       const interval = setInterval(updateCode, 30000); // Update every 30s
+
+      const fillBtn = createBtn("Fill", () => handleFill(code.textContent));
 
       // Append elements to div
 
@@ -174,22 +177,29 @@ function handleFill(currentCode) {
     console.warn("Code not ready yet.");
     return;
   }
-  navigator.clipboard.writeText(currentCode);
-  // Send to content script
+  // Copy to clipboard safely
+  navigator.clipboard.writeText(currentCode)
+    .then(() => console.log("Copied to clipboard"))
+    .catch(err => console.error("Clipboard error:", err));
+
+  // Send message to active tab
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]?.id) {
-      chrome.tabs.sendMessage(
-        tabs[0].id,
-        { action: "fill_otp", codeNum: currentCode }, // Ensure key name matches your content script
-        (response) => {
-          if (chrome.runtime.lastError) {
-            console.error("Content script not found or error:", chrome.runtime.lastError.message);
-          } else {
-            console.log("Autofill response:", response);
-          }
-        }
-      );
+    if (!tabs.length || !tabs[0].id) {
+      console.error("No active tab found.");
+      return;
     }
+
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      { action: "fill_otp", codeNum: currentCode },
+      (response) => {
+        if (chrome.runtime.lastError) {
+          console.error("Message error:", chrome.runtime.lastError.message);
+        } else {
+          console.log("Autofill response:", response);
+        }
+      }
+    );
   });
 }
 /**

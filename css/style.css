@@ -28,3 +28,20 @@ button {
 #myc {
   width: 80%;
 }
+
+.account-item {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px;
+  background: white;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.otp-code {
+  font-size: 24px;
+  font-weight: bold;
+  margin: 8px 0;
+}
