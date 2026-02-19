@@ -286,28 +286,47 @@ function loadViewPage(name) {
  */
 
 
+// function loadAddPage() {
+//   const container = document.getElementById("page-add");
+//   container.innerHTML = `
+//     <h3>Add TOTP Key</h3>
+//     <input type="text" id="key-name" placeholder="Account name"><br>
+//     <input type="text" id="key-secret" placeholder="Secret"><br>
+//     <button id="save-btn">Save</button>
+//     <button id="back-btn">Back</button><br>
+//     <input type="file" id="qr-upload" accept="image/*"><br>
+//     <div id="reader" style="width: 220px; display:none;"></div>
+//     <p id="qr-status"></p>
+
+//   `;
+
+//   document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
+//   document.getElementById("save-btn").addEventListener("click", saveManualKey);
+//   document.getElementById("back-btn").addEventListener("click", () => {
+//     location.hash = "#list";
+//   });
+
+
+// }
+
 function loadAddPage() {
   const container = document.getElementById("page-add");
-  container.innerHTML = `
-    <h3>Add TOTP Key</h3>
-    <input type="text" id="key-name" placeholder="Account name"><br>
-    <input type="text" id="key-secret" placeholder="Secret"><br>
-    <button id="save-btn">Save</button>
-    <button id="back-btn">Back</button><br>
-    <input type="file" id="qr-upload" accept="image/*"><br>
-    <div id="reader" style="width: 220px; display:none;"></div>
-    <p id="qr-status"></p>
 
-  `;
+  fetch("add.html")
+    .then(response => response.text())
+    .then(html => {
+      container.innerHTML = html;
 
-  document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
-  document.getElementById("save-btn").addEventListener("click", saveManualKey);
-  document.getElementById("back-btn").addEventListener("click", () => {
-    location.hash = "#list";
-  });
-
-
+      // Attach listeners AFTER content loads
+      document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
+      document.getElementById("save-btn").addEventListener("click", saveManualKey);
+      document.getElementById("back-btn").addEventListener("click", () => {
+        location.hash = "#list";
+      });
+    })
+    .catch(err => console.error("Error loading page:", err));
 }
+
 
 
 // Save manually typed key
@@ -330,7 +349,8 @@ function saveManualKey() {
 function handleQrUpload(e) {
   const file = e.target.files[0];
   if (!file) return;
-
+  if (file) {
+      previewFile(file);
   const img = new Image();
   const url = URL.createObjectURL(file);
 
@@ -340,7 +360,7 @@ function handleQrUpload(e) {
   };
 
   img.src = url;
-}
+} }
 
 
 function decodeQrFromImage(img) {

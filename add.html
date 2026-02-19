@@ -3,29 +3,29 @@
 <head>
   <meta charset="utf-8" />
   <title>Add TOTP</title>
-  <style>
-    body {
-      font-family: system-ui, sans-serif;
-      padding: 12px;
-      width: 280px;
-    }
-    input, button {
-      width: 100%;
-      margin: 6px 0;
-    }
-  </style>
+  <link rel="stylesheet" href="css/add.css">
 </head>
 <body>
-  <h3>Add TOTP Key</h3>
+  <div class="qrpage">
+  <img id="myc" src="images/Title Logo.png" alt="Mint Your Code">
+  <h3>Add Account</h3>
 
   <input type="text" id="key-name" placeholder="Account name">
   <input type="text" id="key-secret" placeholder="Secret">
 
-  <input type="file" id="qr-upload" accept="image/*">
+  <input type="file" id="qr-upload" accept="image/*" hidden>
+  <label for="qr-upload" class="upload-box">
+    <span id="upload-text">
+    📷 Drag & Drop QR Image<br>or Click to Upload
+  </span>
+  <img id="preview-image" hidden />
+  </label>
+
   <p id="qr-status"></p>
 
   <button id="save-btn">Save</button>
   <button id="close-btn">Close</button>
+  </div>
 
   <!-- jsQR must already be bundled -->
   <script src="js/jsqr.js"></script>
