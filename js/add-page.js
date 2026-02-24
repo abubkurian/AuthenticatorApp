@@ -1,14 +1,6 @@
-// // This file runs ONLY in add.html
+// add-page.js — runs after popup.html loads; page-add elements are already in the DOM.
 
-// document.addEventListener("DOMContentLoaded", () => {
-//   document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
-
-//   document.getElementById("save-btn").addEventListener("click", saveManualKey);
-
-//   document.getElementById("close-btn").addEventListener("click", () => window.close());
-// });
-
-document.addEventListener("DOMContentLoaded", () => {
+(function () {
   const fileInput = document.getElementById("qr-upload");
   const dropArea = document.getElementById("drop-area");
   const previewImage = document.getElementById("preview-image");
@@ -16,7 +8,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
   fileInput.addEventListener("change", handleQrUpload);
   document.getElementById("save-btn").addEventListener("click", saveManualKey);
-  document.getElementById("close-btn").addEventListener("click", () => window.close());
+
+  // Close / back: if we're inside the popup, navigate home; if standalone tab, close.
+  document.getElementById("close-btn").addEventListener("click", () => {
+    if (window.location.pathname.includes("popup")) {
+      location.hash = "#list";
+    } else {
+      window.close();
+    }
+  });
 
   // Prevent default drag behaviors
   ["dragenter", "dragover", "dragleave", "drop"].forEach(eventName => {
@@ -30,15 +30,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Highlight drop area
   ["dragenter", "dragover"].forEach(eventName => {
-    dropArea.addEventListener(eventName, () => {
-      dropArea.classList.add("dragover");
-    });
+    dropArea.addEventListener(eventName, () => dropArea.classList.add("dragover"));
   });
 
   ["dragleave", "drop"].forEach(eventName => {
-    dropArea.addEventListener(eventName, () => {
-      dropArea.classList.remove("dragover");
-    });
+    dropArea.addEventListener(eventName, () => dropArea.classList.remove("dragover"));
   });
 
   // Handle drop
@@ -67,18 +63,17 @@ document.addEventListener("DOMContentLoaded", () => {
   function handleQrUpload(e) {
     const file = e.target.files[0];
     if (!file) return;
-    if (file) {
-      previewFile(file);
-      const img = new Image();
-      const url = URL.createObjectURL(file);
 
-      img.onload = () => {
-        decodeQrFromImage(img);
-        URL.revokeObjectURL(url);
-      };
+    previewFile(file);
+    const img = new Image();
+    const url = URL.createObjectURL(file);
 
-      img.src = url;
-    }
+    img.onload = () => {
+      decodeQrFromImage(img);
+      URL.revokeObjectURL(url);
+    };
+
+    img.src = url;
   }
 
 
@@ -148,4 +143,4 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-});
+})();

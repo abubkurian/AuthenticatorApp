@@ -7,10 +7,10 @@
     "default_icon": {
       "16": "icons/iconbuild16.png",
       "48": "icons/iconbuild48.png"
-    },
-    "content_security_policy": {
-      "extension_pages": "script-src 'self'; object-src 'self'"
     }
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
   },
   "permissions": [
     "storage",
@@ -20,10 +20,6 @@
   "host_permissions": [
     "*://*/*"
   ],
-  "file_system_provider_capabilities": {
-    "configurable": true,
-    "watchable": true
-  },
   "icons": {
     "16": "icons/iconbuild16.png",
     "48": "icons/iconbuild48.png",

@@ -191,7 +191,7 @@ function handleFill(currentCode) {
 
     chrome.tabs.sendMessage(
       tabs[0].id,
-      { action: "fill_otp", codeNum: currentCode },
+      { action: "fill_otp", code: currentCode },
       (response) => {
         if (chrome.runtime.lastError) {
           console.error("Message error:", chrome.runtime.lastError.message);
@@ -240,7 +240,10 @@ function loadViewPage(name) {
     const interval = setInterval(updateCode, 30000); // Update every 30s
     updateCode(); // Run once immediately
 
+    // Clear the interval when navigating away to avoid leaking timers
+    window.addEventListener("hashchange", () => clearInterval(interval), { once: true });
   });
+
   document.getElementById("copy").onclick = () => {
     const code = document.getElementById("code").textContent;
     navigator.clipboard.writeText(code);
@@ -249,16 +252,30 @@ function loadViewPage(name) {
   document.getElementById("fill").onclick = () => {
     const code = document.getElementById("code").textContent;
 
+    // Guard against code not being ready yet
+    if (code === "Loading..." || code === "Error") {
+      console.warn("Code not ready yet.");
+      return;
+    }
+
     // Copy to clipboard
     navigator.clipboard.writeText(code);
 
     // Also autofill in webpage
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs.length || !tabs[0].id) {
+        console.error("No active tab found.");
+        return;
+      }
       chrome.tabs.sendMessage(
         tabs[0].id,
         { action: "fill_otp", code },
         (response) => {
-          console.log("Autofill response:", response);
+          if (chrome.runtime.lastError) {
+            console.error("Message error:", chrome.runtime.lastError.message);
+          } else {
+            console.log("Autofill response:", response);
+          }
         }
       );
     });
@@ -277,22 +294,13 @@ function loadViewPage(name) {
 }
 
 
-// Load add page
+// Reset the add page form each time it is shown
 function loadAddPage() {
-  const container = document.getElementById("page-add");
-
-  fetch("add.html")
-    .then(response => response.text())
-    .then(html => {
-      container.innerHTML = html;
-
-      // Manually load the JS
-      const script = document.createElement("script");
-      script.src = "js/add-page.js";
-      script.defer = true;
-      document.body.appendChild(script);
-    })
-    .catch(err => console.error("Error loading page:", err));
+  document.getElementById("key-name").value = "";
+  document.getElementById("key-secret").value = "";
+  document.getElementById("qr-status").textContent = "";
+  document.getElementById("preview-image").hidden = true;
+  document.getElementById("upload-text").style.display = "";
 }
 
 
