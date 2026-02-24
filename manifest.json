@@ -20,7 +20,7 @@
   "host_permissions": [
     "*://*/*"
   ],
-    "file_system_provider_capabilities": {
+  "file_system_provider_capabilities": {
     "configurable": true,
     "watchable": true
   },

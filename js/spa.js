@@ -277,38 +277,7 @@ function loadViewPage(name) {
 }
 
 
-
-/*
- * Render the add page which provides manual entry fields and a QR scanner.
- *
- * On save (or successful QR scan) the new key is stored under `keys[name]` in
- * `chrome.storage.sync` and the UI navigates back to the list page.
- */
-
-
-// function loadAddPage() {
-//   const container = document.getElementById("page-add");
-//   container.innerHTML = `
-//     <h3>Add TOTP Key</h3>
-//     <input type="text" id="key-name" placeholder="Account name"><br>
-//     <input type="text" id="key-secret" placeholder="Secret"><br>
-//     <button id="save-btn">Save</button>
-//     <button id="back-btn">Back</button><br>
-//     <input type="file" id="qr-upload" accept="image/*"><br>
-//     <div id="reader" style="width: 220px; display:none;"></div>
-//     <p id="qr-status"></p>
-
-//   `;
-
-//   document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
-//   document.getElementById("save-btn").addEventListener("click", saveManualKey);
-//   document.getElementById("back-btn").addEventListener("click", () => {
-//     location.hash = "#list";
-//   });
-
-
-// }
-
+// Load add page
 function loadAddPage() {
   const container = document.getElementById("page-add");
 
@@ -317,100 +286,13 @@ function loadAddPage() {
     .then(html => {
       container.innerHTML = html;
 
-      // Attach listeners AFTER content loads
-      document.getElementById("qr-upload").addEventListener("change", handleQrUpload);
-      document.getElementById("save-btn").addEventListener("click", saveManualKey);
-      document.getElementById("back-btn").addEventListener("click", () => {
-        location.hash = "#list";
-      });
+      // Manually load the JS
+      const script = document.createElement("script");
+      script.src = "js/add-page.js";
+      script.defer = true;
+      document.body.appendChild(script);
     })
     .catch(err => console.error("Error loading page:", err));
-}
-
-
-
-// Save manually typed key
-function saveManualKey() {
-  const name = document.getElementById("key-name").value.trim();
-  const secret = document.getElementById("key-secret").value.trim();
-
-  if (!name || !secret) return;
-
-  chrome.storage.sync.get({ keys: {} }, (data) => {
-    const keys = data.keys;
-    keys[name] = secret;
-    chrome.storage.sync.set({ keys }, () => {
-      location.hash = "#list";
-    });
-  });
-}
-
-
-function handleQrUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file) {
-      previewFile(file);
-  const img = new Image();
-  const url = URL.createObjectURL(file);
-
-  img.onload = () => {
-    decodeQrFromImage(img);
-    URL.revokeObjectURL(url);
-  };
-
-  img.src = url;
-} }
-
-
-function decodeQrFromImage(img) {
-  const canvas = document.createElement("canvas");
-  const ctx = canvas.getContext("2d");
-
-  canvas.width = img.width;
-  canvas.height = img.height;
-
-  ctx.drawImage(img, 0, 0);
-
-  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-
-  const code = jsQR(imageData.data, canvas.width, canvas.height);
-
-  if (!code) {
-    document.getElementById("qr-status").textContent = "Could not read QR code.";
-    return;
-  }
-
-  parseOtpAuthUri(code.data);
-}
-
-function parseOtpAuthUri(uri) {
-  if (!uri.startsWith("otpauth://totp/")) {
-    document.getElementById("qr-status").textContent = "Invalid TOTP QR.";
-    return;
-  }
-
-  const withoutPrefix = uri.replace("otpauth://totp/", "");
-  const [label, query] = withoutPrefix.split("?");
-
-  const params = new URLSearchParams(query);
-  const secret = params.get("secret");
-  const issuer = params.get("issuer");
-
-  let name = decodeURIComponent(label);
-  if (issuer && !name.includes(issuer)) {
-    name = issuer + " (" + name + ")";
-  }
-
-  if (!secret) {
-    document.getElementById("qr-status").textContent = "QR missing secret.";
-    return;
-  }
-
-  document.getElementById("key-name").value = name;
-  document.getElementById("key-secret").value = secret;
-
-  document.getElementById("qr-status").textContent = "QR data loaded.";
 }
 
 

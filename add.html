@@ -1,35 +1,38 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="utf-8" />
   <title>Add TOTP</title>
   <link rel="stylesheet" href="css/add.css">
 </head>
+
 <body>
   <div class="qrpage">
-  <img id="myc" src="images/Title Logo.png" alt="Mint Your Code">
-  <h3>Add Account</h3>
+    <img id="myc" src="images/Title Logo.png" alt="Mint Your Code">
+    <h3>Add Account</h3>
 
-  <input type="text" id="key-name" placeholder="Account name">
-  <input type="text" id="key-secret" placeholder="Secret">
+    <input type="text" id="key-name" placeholder="Account name">
+    <input type="text" id="key-secret" placeholder="Secret">
 
-  <input type="file" id="qr-upload" accept="image/*" hidden>
-  <label for="qr-upload" class="upload-box">
-    <span id="upload-text">
-    📷 Drag & Drop QR Image<br>or Click to Upload
-  </span>
-  <img id="preview-image" hidden />
-  </label>
+    <input type="file" id="qr-upload" accept="image/*" hidden>
+    <label for="qr-upload" class="upload-box">
+      <span id="upload-text">
+        📷 Drag & Drop QR Image<br>or Click to Upload
+      </span>
+      <img id="preview-image" hidden />
+    </label>
 
-  <p id="qr-status"></p>
+    <p id="qr-status"></p>
 
-  <button id="save-btn">Save</button>
-  <button id="close-btn">Close</button>
+    <button id="save-btn">Save</button>
+    <button id="close-btn">Close</button>
   </div>
 
   <!-- jsQR must already be bundled -->
   <script src="js/jsqr.js"></script>
-  <script src="js/spa.js"></script>
   <script src="js/add-page.js"></script>
+  <script src="js/spa.js"></script>
 </body>
+
 </html>
