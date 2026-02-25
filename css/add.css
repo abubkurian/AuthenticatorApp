@@ -1,48 +1,50 @@
-
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
 }
 
- body {
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-    max-width: 500px;
-    margin: auto;
+body {
+  font-family: 'Montserrat', sans-serif;
+  text-align: center;
+  max-width: 500px;
+  margin: auto;
 }
 
 input {
-      width: 100%;
-      margin: 10px;
-      height: 2rem;
-      border: none;
-      background-color: #ebebeb;
-      padding: 0.5rem;
-      /* box-shadow: 0.2rem 0.2rem 0.5rem #c5c5c5aa; */
-    }
+  width: 100%;
+  margin: 10px;
+  height: 2rem;
+  border: none;
+  background-color: #ebebeb;
+  padding: 0.5rem;
+  /* box-shadow: 0.2rem 0.2rem 0.5rem #c5c5c5aa; */
+}
 
 button {
-    width: 30%;
-    margin: 10px;
+  width: 30%;
+  margin: 10px;
 }
 
 .qrpage {
-    padding-top: 10vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+  padding-top: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
 #myc {
   width: 80%;
   margin: 3vh;
 }
+
 .upload-box {
   width: 220px;
+  padding: 12px;
   aspect-ratio: 1 / 1;
   display: flex;
   align-items: center;
@@ -67,10 +69,10 @@ button {
 .upload-box img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Keeps square crop */
+  object-fit: cover;
+  /* Keeps square crop */
 }
 
 #upload-text {
   padding: 15px;
 }
-

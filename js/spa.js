@@ -117,9 +117,11 @@ function loadListPage() {
       code.className = "otp-code";
       code.textContent = "Loading...";
 
+      const buttons = document.createElement("div");
+      buttons.className = "button-row";
       // Action Buttons
-      const viewBtn = createBtn("View", () => location.hash = `#view/${encodeURIComponent(name)}`);
-      const deleteBtn = createBtn("Delete", () => deleteKey(name));
+      const viewBtn = createBtn("icons/view.svg", () => location.hash = `#view/${encodeURIComponent(name)}`, "View");
+      // const deleteBtn = createBtn("icons/delete.svg", () => deleteKey(name), "Delete");
 
 
       // --- TOTP Update Logic ---
@@ -136,11 +138,12 @@ function loadListPage() {
       updateCode();
       const interval = setInterval(updateCode, 30000); // Update every 30s
 
-      const fillBtn = createBtn("Fill", () => handleFill(code.textContent));
+      const fillBtn = createBtn("icons/fill.svg", () => handleFill(code.textContent), "Fill");
 
       // Append elements to div
 
-      div.append(label, code, viewBtn, deleteBtn, fillBtn);
+      buttons.append(viewBtn, fillBtn);
+      div.append(label, code, buttons);
       container.appendChild(div);
 
     }
@@ -163,10 +166,18 @@ function loadListPage() {
 
 
 // Helper to keep the main function clean
-function createBtn(text, onClick) {
+function createBtn(imgSrc, onClick, altText = "") {
   const btn = document.createElement("button");
-  btn.textContent = text;
+
+  const img = document.createElement("img");
+  img.src = imgSrc;
+  img.alt = altText;
+  img.className = "icon";
+
+  btn.appendChild(img);
+  btn.title = altText;
   btn.onclick = onClick;
+
   return btn;
 }
 
@@ -228,10 +239,36 @@ function deleteKey(name) {
  */
 function loadViewPage(name) {
   const container = document.getElementById("page-view");
-  container.innerHTML = "<h3>" + name + "</h3><div id='code'>Loading...</div><button id='copy'>Copy</button><br><button id='fill'>Fill</button><br><button id='back-btn'>Back</button><br><button id='delete-btn'>Delete</button>";
+  container.innerHTML =
+    "<div class='account-item'>" +
+    "<h3>" + name + "</h3>" +
+    "<div id='code'>Loading...</div>" +
+    "<div id='qr-preview' class='upload-box'></div>" +
+    "<div class='button-row'>" +
+    "<button id='copy'><img src='icons/copy.svg' alt='Copy' class='icon' title='Copy'></button><br>" +
+    "<button id='fill'><img src='icons/fill.svg' alt='Fill' class='icon' title='Fill'></button><br>" +
+    "<button id='delete-btn'><img src='icons/delete.svg' alt='Delete' class='icon' title='Delete'></button><br>" +
+    "</div>" +
+    "<button id='back-btn'>Back</button><br>" +
+    "</div>";
 
   chrome.storage.sync.get({ keys: {} }, (data) => {
     const secret = data.keys[name];
+
+    // --- QR Code Preview ---
+    if (secret && typeof QRCode !== "undefined") {
+      const uri = "otpauth://totp/" + encodeURIComponent(name) +
+        "?secret=" + secret + "&issuer=" + encodeURIComponent(name);
+      new QRCode(document.getElementById("qr-preview"), {
+        text: uri,
+        width: 160,
+        height: 160,
+        colorDark: "#000000",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
     const updateCode = () => {
       generateTOTP(secret).then(code => {
         document.getElementById("code").textContent = code;
